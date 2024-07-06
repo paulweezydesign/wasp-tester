@@ -1,0 +1,73 @@
+app snippetapp {
+  wasp: {
+    version: "^0.13.0"
+  },
+  title: "snippetapp",
+  client: {
+    rootComponent: import { Layout } from "@src/Layout.jsx",
+  },
+  db: {
+    prisma: {
+      clientPreviewFeatures: ["extendedWhereUnique"]
+    }
+  },
+  auth: {
+    userEntity: User,
+    methods: {
+      usernameAndPassword: {}
+    },
+    onAuthFailedRedirectTo: "/login",
+    onAuthSucceededRedirectTo: "/"
+  },
+}
+
+route SnippetListRoute { path: "/", to: SnippetListPage }
+page SnippetListPage {
+  component: import SnippetList from "@src/pages/SnippetList.jsx",
+  authRequired: true
+}
+
+route SnippetDetailRoute { path: "/snippet/:snippetId", to: SnippetDetailPage }
+page SnippetDetailPage {
+  component: import SnippetDetail from "@src/pages/SnippetDetail.jsx",
+  authRequired: true
+}
+
+entity User {=psl
+  id       Int       @id @default(autoincrement()),
+  snippets Snippet[]
+psl=}
+
+entity Snippet {=psl
+  id         Int     @id @default(autoincrement()),
+  title      String,
+  content    String,
+  isFavorite Boolean @default(false),
+  user       User    @relation(fields: [userId], references: [id]),
+  userId     Int
+psl=}
+
+action createSnippet {
+  fn: import { createSnippet } from "@src/actions.js",
+  entities: [Snippet],
+}
+
+action updateSnippet {
+  fn: import { updateSnippet } from "@src/actions.js",
+  entities: [Snippet],
+}
+
+action deleteSnippet {
+  fn: import { deleteSnippet } from "@src/actions.js",
+  entities: [Snippet],
+}
+
+query getUserSnippets {
+  fn: import { getUserSnippets } from "@src/queries.js",
+  entities: [Snippet],
+}
+
+query getSnippet {
+  fn: import { getSnippet } from "@src/queries.js",
+  entities: [Snippet],
+}
